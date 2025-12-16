@@ -26,6 +26,7 @@ router.get('/:id', async (req, res) => {
 // Create Service
 router.post('/', async (req, res) => {
     const service = new Service(req.body);
+    console.log(service);
     try {
         const newService = await service.save();
         res.status(201).json(newService);
