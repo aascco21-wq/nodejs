@@ -18,7 +18,7 @@ if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
 }
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.scabps6.mongodb.net/aascco')
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.log(err));
 
