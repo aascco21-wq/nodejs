@@ -36,6 +36,7 @@ app.use('/api/projects', projectsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/media-collections', require('./routes/mediaCollections'));
 
 app.get('/', (req, res) => {
     res.send('AASCCO Backend Running');
