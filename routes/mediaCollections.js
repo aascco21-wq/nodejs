@@ -185,4 +185,38 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// @route   DELETE /api/media-collections/:id/files/:fileId
+// @desc    Delete a specific file from a media collection
+// @access  Public
+router.delete('/:id/files/:fileId', async (req, res) => {
+    try {
+        const collection = await MediaCollection.findById(req.params.id);
+        if (!collection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+
+        const fileIndex = collection.files.findIndex(f => f._id.toString() === req.params.fileId);
+        if (fileIndex === -1) {
+            return res.status(404).json({ message: 'File not found in collection' });
+        }
+
+        const file = collection.files[fileIndex];
+
+        // Delete from disk
+        if (file.url && file.url.startsWith('/')) {
+            removeFile(file.url.substring(1));
+        }
+
+        // Remove from array
+        collection.files.splice(fileIndex, 1);
+        await collection.save();
+
+        res.json({ message: 'File removed from collection', collection });
+
+    } catch (error) {
+        console.error('Error deleting file from collection:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+
 module.exports = router;
