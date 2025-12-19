@@ -13,12 +13,9 @@ router.post('/image', (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const folder = req.file.destination.includes('videos') ? 'videos' : 'images';
-        const fileUrl = `/uploads/${folder}/${req.file.filename}`;
-
         res.json({
             message: 'File uploaded successfully',
-            url: fileUrl,
+            url: req.file.path,
             filename: req.file.filename
         });
     });
@@ -36,9 +33,8 @@ router.post('/images', (req, res) => {
         }
 
         const fileUrls = req.files.map(file => {
-            const folder = file.destination.includes('videos') ? 'videos' : 'images';
             return {
-                url: `/uploads/${folder}/${file.filename}`,
+                url: file.path,
                 filename: file.filename
             };
         });
@@ -61,10 +57,9 @@ router.post('/video', (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const fileUrl = `/uploads/videos/${req.file.filename}`;
         res.json({
             message: 'Video uploaded successfully',
-            url: fileUrl,
+            url: req.file.path,
             filename: req.file.filename
         });
     });

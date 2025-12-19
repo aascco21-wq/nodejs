@@ -28,9 +28,8 @@ router.post('/', (req, res) => {
             let files = [];
             if (req.files && req.files.length > 0) {
                 files = req.files.map(file => {
-                    const folder = file.destination.includes('videos') ? 'videos' : 'images';
                     return {
-                        url: `/uploads/${folder}/${file.filename}`,
+                        url: file.path,
                         filename: file.filename,
                         mimetype: file.mimetype,
                         originalName: file.originalname,
@@ -133,9 +132,8 @@ router.put('/:id', (req, res) => {
             // Append new files if uploaded
             if (req.files && req.files.length > 0) {
                 const newFiles = req.files.map(file => {
-                    const folder = file.destination.includes('videos') ? 'videos' : 'images';
                     return {
-                        url: `/uploads/${folder}/${file.filename}`,
+                        url: file.path,
                         filename: file.filename,
                         mimetype: file.mimetype,
                         originalName: file.originalname,
@@ -207,11 +205,18 @@ router.delete('/:id/files/:fileId', async (req, res) => {
             removeFile(file.url.substring(1));
         }
 
-        // Remove from array
-        collection.files.splice(fileIndex, 1);
-        await collection.save();
+        // Remove from array atomically to avoid VersionError
+        const updatedCollection = await MediaCollection.findByIdAndUpdate(
+            req.params.id,
+            { $pull: { files: { _id: req.params.fileId } } },
+            { new: true }
+        );
 
-        res.json({ message: 'File removed from collection', collection });
+        if (!updatedCollection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+
+        res.json({ message: 'File removed from collection', collection: updatedCollection });
 
     } catch (error) {
         console.error('Error deleting file from collection:', error);
